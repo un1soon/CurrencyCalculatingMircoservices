@@ -8,14 +8,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.mikhalev.projects.CurrencyCalculator.entity.Currency;
 import ru.mikhalev.projects.CurrencyCalculator.exception.WrongRequestedCurrencyException;
 import ru.mikhalev.projects.CurrencyCalculator.jsonClasses.Data;
 import ru.mikhalev.projects.CurrencyCalculator.jsonClasses.Valute;
+import ru.mikhalev.projects.CurrencyCalculator.mapper.CurrencyMapper;
 import ru.mikhalev.projects.CurrencyCalculator.repository.CurrencyRepository;
+import ru.mikhalev.projects.CurrencyCalculator.scheduler.CentralBankRequestTask;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 
@@ -32,10 +36,18 @@ import java.util.Map;
 public class CurrencyService {
     @Value("${url.to.central.bank.archive}")
     private String archiveURL;
-    private final RestTemplate restTemplate= new RestTemplate();
+
+    @Value("${url.to.central.bank.now}")
+    private String URL;
+    private final RestTemplate restTemplate = new RestTemplate();
     private final CurrencyRepository currencyRepository;
 
-    public BigDecimal getAmount(String currentCurrency, String necessaryCurrency, BigDecimal amount) {
+    public BigDecimal getAmount(String currentCurrency, String necessaryCurrency, BigDecimal amount) throws JsonProcessingException {
+
+        if(currencyRepository.findAll().size() == 0) {
+            sendRequestToTheCentralBankInFirstStartApp();
+        }
+
         if(currentCurrency.equals("RUB")) {
             BigDecimal necessaryCurrencyFromDatabase = currencyRepository.getCurrencyByCharCode(necessaryCurrency).getValue();
             return amount.divide(necessaryCurrencyFromDatabase, 2, RoundingMode.HALF_UP);
@@ -129,5 +141,25 @@ public class CurrencyService {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         return objectMapper.readValue(jsonString, Data.class);
+    }
+
+    public void sendRequestToTheCentralBankInFirstStartApp() throws JsonProcessingException {
+        log.info("A request to the central bank has been sent in: " + LocalDate.now());
+        String jsonString = sendRequestToTheCentralBank(URL);
+        Map<String, Valute> mapWithValutes = mapReceivedDataInValutes(jsonString);
+        updateCurrenciesInDatabase(mapWithValutes);
+    }
+
+    public Map<String, Valute> mapReceivedDataInValutes(String jsonString) throws JsonProcessingException {
+        Data mappedData = mapReceivedData(jsonString);
+        return mappedData.getValute();
+    }
+
+    public void updateCurrenciesInDatabase(Map<String, Valute> mapWithValutes) {
+        for(Valute valute : mapWithValutes.values()) {
+            log.info(String.valueOf(valute));
+            currencyRepository.save((CurrencyMapper.INSTANCE.toCurrency(valute)));
+        }
+        log.info("All currencies successfully updated in database");
     }
 }

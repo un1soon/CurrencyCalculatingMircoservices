@@ -63,7 +63,7 @@ public class CurrencyServiceTest {
 
     @Test
     @DisplayName("Рассчет суммы на основе текущих курсов валют")
-    void getAmountByCurrentCurrencies_ReturnValidAmount() {
+    void getAmountByCurrentCurrencies_ReturnValidAmount() throws JsonProcessingException {
         //given
         ReflectionTestUtils.setField(currencyService, "archiveURL", "https://www.cbr-xml-daily.ru//archive//%s//%s/%s//daily_json.js");
         String currentCurrency = "USD";

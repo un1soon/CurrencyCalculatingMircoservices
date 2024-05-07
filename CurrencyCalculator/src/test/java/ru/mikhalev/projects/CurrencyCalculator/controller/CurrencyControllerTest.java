@@ -57,7 +57,7 @@ public class CurrencyControllerTest {
 
     @Test
     @DisplayName("GET /calculate возвращает сумму, полученную в ходе конвертации указанных валют на текущую дату")
-    void getAmountByCurrentCurrencies_ReturnValidAmount() {
+    void getAmountByCurrentCurrencies_ReturnValidAmount() throws JsonProcessingException {
         // given
         String currentCurrency = "USD";
         String necessaryCurrency = "RUB";

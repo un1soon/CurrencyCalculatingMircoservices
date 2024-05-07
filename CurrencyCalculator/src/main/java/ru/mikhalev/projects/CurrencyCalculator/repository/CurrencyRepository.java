@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.mikhalev.projects.CurrencyCalculator.entity.Currency;
 
+import java.util.List;
+
 /**
  * @author Ivan Mikhalev
  *
@@ -14,4 +16,5 @@ import ru.mikhalev.projects.CurrencyCalculator.entity.Currency;
 @Repository
 public interface CurrencyRepository extends JpaRepository<Currency, String> {
     Currency getCurrencyByCharCode(String charCode);
+    List<Currency> findAll();
 }

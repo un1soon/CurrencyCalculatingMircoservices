@@ -41,6 +41,13 @@ public class CentralBankRequestTask {
         updateCurrenciesInDatabase(mapWithValutes);
     }
 
+    public void sendRequestToTheCentralBankInFirstStartApp() throws JsonProcessingException {
+        log.info("A request to the central bank has been sent in: " + LocalDate.now());
+        String jsonString = currencyService.sendRequestToTheCentralBank(URL);
+        Map<String, Valute> mapWithValutes = mapReceivedData(jsonString);
+        updateCurrenciesInDatabase(mapWithValutes);
+    }
+
     public Map<String, Valute> mapReceivedData(String jsonString) throws JsonProcessingException {
         Data mappedData = currencyService.mapReceivedData(jsonString);
         return mappedData.getValute();

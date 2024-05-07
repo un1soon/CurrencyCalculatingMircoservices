@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.mikhalev.projects.CurrencyCalculator.exception.AmountLessThanZeroException;
+import ru.mikhalev.projects.CurrencyCalculator.repository.CurrencyRepository;
+import ru.mikhalev.projects.CurrencyCalculator.scheduler.CentralBankRequestTask;
 import ru.mikhalev.projects.CurrencyCalculator.service.CurrencyService;
 
 import java.math.BigDecimal;
@@ -38,9 +40,11 @@ public class CurrencyController {
             String necessaryCurrency,
             @Schema(example = "10", implementation = BigDecimal.class)
             @RequestParam(value = "amount")
-            BigDecimal amount) {
+            BigDecimal amount) throws JsonProcessingException {
 
         checkAmountInRequest(amount);
+
+        System.out.println(currentCurrency + " " + necessaryCurrency + " " + amount);
 
         return currencyService.getAmount(currentCurrency, necessaryCurrency, amount);
     }

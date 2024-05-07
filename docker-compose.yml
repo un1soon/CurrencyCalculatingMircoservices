@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+
+  eureka-server:
+    build: ./EurekaService/
+    container_name: "eureka-server"
+    ports:
+      - "8761:8761"
+
+    healthcheck:
+      test: curl --fail http://localhost:8761 || exit 1
+      interval: 10s
+      retries: 5
+      timeout: 10s
+
+  api-gateway:
+    build: ./Gateway/
+    container_name: "api-gateway"
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+  postgres:
+    image: 'postgres:15'
+    container_name: 'postgres'
+    ports:
+      - "5432"
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_DB=currencies_db'
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  currency-calculator:
+    build: ./CurrencyCalculator/
+    container_name: currency-calculator
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_started

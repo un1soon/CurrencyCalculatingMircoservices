@@ -4,18 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ru.mikhalev</groupId>
-	<artifactId>NotificationsAPI</artifactId>
+	<artifactId>CurrenciesAPI</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>currency-microservices</name>
 	<modules>
 		<module>CurrencyCalculator</module>
+		<module>EurekaService</module>
+		<module>Gateway</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
-
 </project>
